@@ -1,58 +1,110 @@
-Binance Futures AI Market Intelligence
-Binance USDⓈ-M Futures piyasalarından gerçek zamanlı ve geçmiş verileri toplayan, teknik analiz ve piyasa mikro-yapı metriklerini deterministik olarak hesaplayan ve sonuçları AI destekli analiz için paketleyen full-stack market intelligence sistemi.
-Amaç: Otomatik işlem açan bir trading bot geliştirmek değil; özellikle kısa vadeli ve 5 dakikalık futures analizlerinde kullanılabilecek ölçülebilir, veri odaklı bir karar destek altyapısı oluşturmaktır.
-🎯 Projenin Amacı
-Binance Futures AI Market Intelligence, Binance Futures piyasasından gelen verileri tek bir analiz altyapısında birleştirir.
-Sistem:
-Binance USDⓈ-M Futures'tan canlı ve geçmiş piyasa verilerini toplar.
-Gelen verileri normalize eder ve veri kalitesini kontrol eder.
-Teknik indikatörleri hesaplar.
-Market structure analizi yapar.
-Volume ve order flow metriklerini üretir.
-Order book yapısını analiz eder.
-Open Interest, Funding Rate ve diğer derivatives verilerini değerlendirir.
-Multi-timeframe piyasa bağlamı oluşturur.
-LONG ve SHORT tarafı için deterministik Confluence Score hesaplar.
-Kullanıcının seçtiği coin için bir AI Snapshot oluşturur.
-Snapshot verilerini JSON, CSV ve gerektiğinde grafik olarak dışa aktarır.
-Bu paket ChatGPT'ye yüklenerek senaryo ve risk analizi yapılabilir.
-Temel akış:
-Binance Futures
-       ↓
-Python Market Collector
-       ↓
-Normalize + Validate
-       ↓
-PostgreSQL / TimescaleDB
-       +
-      Redis
-       ↓
-Analytics Engine
-       ↓
-Confluence Engine
-       ↓
-React Dashboard
-       ↓
-AI Snapshot
-       ↓
-JSON + CSV + Charts
-       ↓
-ChatGPT
-       ↓
-LONG / SHORT / NO TRADE
-       ↓
-Journal + Performance Measurement
+# Binance Futures AI Market Intelligence
 
-🧠 AI'nin Rolü
-Bu projede AI doğrudan trade açan veya emir veren bir sistem değildir.
-AI'nin görevi:
-piyasa senaryolarını karşılaştırmak,
-bullish ve bearish argümanları değerlendirmek,
-confluence analizi yapmak,
-riskleri belirtmek,
-invalidation noktalarını değerlendirmek,
-karşı görüş üretmek,
-sonuç olarak:
+> Real-time Binance USDⓈ-M Futures market intelligence, deterministic quantitative analytics, market scanning, and AI-assisted scenario analysis.
+
+**Binance Futures AI Market Intelligence** is a full-stack market analysis platform designed to collect real-time and historical Binance Futures data, calculate technical and market microstructure metrics, rank trading setups, and generate structured analysis packages for AI-assisted evaluation.
+
+The system is designed primarily around **short-term and 5-minute futures market analysis**.
+
+> [!IMPORTANT]
+> This project is **not an automated trading bot**.
+> V1 does not place orders, execute trades, or require withdrawal permissions. It is designed as a read-only market intelligence and decision-support system.
+
+---
+
+## 🎯 Project Goals
+
+The platform combines multiple layers of futures market data into a single analysis pipeline.
+
+It is designed to:
+
+* Collect real-time Binance Futures market data
+* Retrieve and store historical market data
+* Validate and normalize incoming data
+* Calculate technical indicators
+* Detect market structure
+* Analyze volume and order flow
+* Analyze order book liquidity
+* Track Open Interest and Funding Rate
+* Build multi-timeframe market context
+* Calculate deterministic LONG and SHORT Confluence Scores
+* Scan USDT perpetual markets for interesting setups
+* Generate structured AI Snapshots
+* Export analysis as JSON, CSV, and optional charts
+* Evaluate analysis results against future price movement
+
+---
+
+## 🏗️ System Architecture
+
+```text
+Binance USDⓈ-M Futures
+          │
+          ├── WebSocket
+          │   ├── Klines
+          │   ├── AggTrades
+          │   ├── Book Ticker
+          │   └── Depth
+          │
+          └── REST API
+              ├── Historical Candles
+              ├── Open Interest
+              ├── Funding
+              └── Market Metadata
+                    │
+                    ▼
+           Python Market Collector
+                    │
+                    ▼
+           Normalize + Validate
+                    │
+             ┌──────┴──────┐
+             ▼             ▼
+      PostgreSQL /      Redis
+      TimescaleDB      Live State
+             └──────┬──────┘
+                    ▼
+            Analytics Engine
+                    │
+                    ▼
+           Confluence Engine
+                    │
+             ┌──────┴──────┐
+             ▼             ▼
+      React Dashboard   AI Snapshot
+                            │
+                            ▼
+                    JSON + CSV + Charts
+                            │
+                            ▼
+                         ChatGPT
+                            │
+                            ▼
+                LONG / SHORT / NO TRADE
+                            │
+                            ▼
+                 Journal + Measurement
+```
+
+---
+
+## 🧠 AI Role
+
+AI is used as the **final reasoning and scenario-analysis layer**, not as the numerical calculation engine.
+
+The AI can evaluate:
+
+* Bullish and bearish scenarios
+* Market context
+* Confluence
+* Risk factors
+* Invalidation conditions
+* Conflicting signals
+* Alternative interpretations
+
+Possible analysis outcomes include:
+
+```text
 LONG BIAS
 SHORT BIAS
 NO TRADE
@@ -134,30 +186,58 @@ kline
 aggTrade
 bookTicker
 depth
-mark price
+markPrice
+```
 
-Ana timeframe:
-5m
+WebSocket is preferred for continuously changing market data.
 
-Desteklenen analiz timeframe'leri:
-TimeframeKullanım1mExecution / micro move3mKısa mikro-yapı5mAna setup15mConfirmation1hIntraday trend4hHigher timeframe contextREST API
-REST API ağırlıklı olarak:
-historical candles,
-backfill,
-Open Interest,
-funding rate,
-funding history,
-long/short ratios,
-top trader ratios,
-taker buy/sell verileri,
-24h ticker,
-symbol metadata
-için kullanılır.
-Gerçek zamanlı veriler mümkün olduğunca WebSocket üzerinden alınır.
-📊 Analytics Engine
-Analytics Engine projenin ana hesaplama katmanıdır.
-Teknik İndikatörler
-İlk sürümde:
+REST is primarily used for initialization, historical data, slower-moving metrics, and recovery.
+
+### REST Data
+
+REST endpoints are used for:
+
+* Historical candles
+* Open Interest
+* Open Interest history
+* Funding Rate
+* Funding history
+* Long/Short ratios
+* Top Trader ratios
+* Taker buy/sell statistics
+* 24h ticker data
+* Exchange metadata
+* Symbol metadata
+* Missing candle backfill
+
+---
+
+## ⏱️ Multi-Timeframe Analysis
+
+The main setup timeframe is **5 minutes**.
+
+| Timeframe | Purpose                    |
+| --------- | -------------------------- |
+| `1m`      | Execution / micro movement |
+| `3m`      | Short-term microstructure  |
+| `5m`      | Primary setup              |
+| `15m`     | Confirmation               |
+| `1h`      | Intraday trend             |
+| `4h`      | Higher-timeframe context   |
+
+The system combines these timeframes instead of evaluating the 5-minute chart in isolation.
+
+---
+
+## 📊 Analytics Engine
+
+The analytics engine is responsible for deterministic market calculations.
+
+### Technical Indicators
+
+Initial V1 indicators include:
+
+```text
 EMA 9 / 20 / 50 / 100 / 200
 SMA 20 / 50 / 200
 RSI 7 / 14
@@ -258,94 +338,155 @@ Price ↑ + OI ↑
 Price ↑ + OI ↓
 Price ↓ + OI ↑
 Price ↓ + OI ↓
+```
 
-kombinasyonlarını sınıflandırabilir.
-🔥 Confluence Score
-AI'den bağımsız olarak backend tarafından LONG ve SHORT için 0–100 setup score oluşturulur.
-Başlangıç ağırlıkları:
-FaktörMaksimum PuanTrend Alignment15Market Structure15Momentum10Volume10Order Flow10Order Book10Derivatives10Support / Resistance10Volatility Suitability5Risk / Reward Context5Toplam100
-Çıktı:
+These combinations provide additional context for position buildup, closing activity, and market participation.
+
+---
+
+## 🔥 Confluence Score
+
+LONG and SHORT setup scores are calculated by the backend independently from AI.
+
+Each side receives a deterministic score between:
+
+```text
+0 ───────────────────────────── 100
+```
+
+Initial weighting:
+
+| Factor                 | Max Score |
+| ---------------------- | --------: |
+| Trend Alignment        |        15 |
+| Market Structure       |        15 |
+| Momentum               |        10 |
+| Volume                 |        10 |
+| Order Flow             |        10 |
+| Order Book             |        10 |
+| Derivatives            |        10 |
+| Support / Resistance   |        10 |
+| Volatility Suitability |         5 |
+| Risk / Reward Context  |         5 |
+| **Total**              |   **100** |
+
+Example output:
+
+```json
 {
-  "long_score": 0,
-  "short_score": 0
+  "long_score": 72,
+  "short_score": 34
 }
+```
 
-Bu değerler gerçek kazanma olasılığı değildir.
-Score yalnızca mevcut piyasa verilerinin ilgili setup ile ne kadar uyumlu olduğunu ifade eder.
-🔍 Market Scanner
-Scanner tüm USDT perpetual piyasasını takip eder.
-Akış:
+> [!NOTE]
+> Confluence Score is **not a probability of winning a trade**.
+> It represents how strongly current market conditions align with a particular setup.
+
+---
+
+## 🔍 Market Scanner
+
+The scanner is designed to monitor the USDT perpetual futures universe.
+
+```text
 All USDT Perpetual Symbols
-          ↓
-      Light Scanner
-          ↓
-   Top 10–20 Candidates
-          ↓
-      Deep Streams
-          ↓
-Full Analytics + Order Flow
-          ↓
-Top Long / Top Short / Avoid
+            │
+            ▼
+       Light Scanner
+            │
+            ▼
+    Rank Market Candidates
+            │
+            ▼
+     Top 10–20 Symbols
+            │
+            ▼
+       Deep Streams
+            │
+            ▼
+       Full Analytics
+            │
+            ▼
+ Top Long / Top Short / Avoid
+```
 
-Scanner ekranında örneğin:
-Symbol
-Price
-Volume
-RVOL
-5m Trend
-15m Trend
-1h Trend
-OI Change
-Funding
-Volatility
-Long Score
-Short Score
+The scanner can expose metrics such as:
 
-gösterilebilir.
-🖥️ Frontend Ekranları
-Dashboard
-Genel sistem durumunu gösterir.
-Örneğin:
-Backend Status
-WebSocket Status
-aktif symbol sayısı
-data quality
-Top Long adayları
-Top Short adayları
-snapshot kısayolları
-Scanner
-USDT perpetual piyasasını tarayan ana ekran.
-Coin'ler hesaplanan market metriklerine göre karşılaştırılabilir.
-Symbol Detail
-Tek bir coin için ayrıntılı analiz ekranıdır.
-Örneğin:
-Candlestick Chart
-Timeframe Selector
-Price
-Trend
-RSI
-ATR
-VWAP
-Volume
-Market Structure
-Order Flow
-Order Book
-Open Interest
-Funding
-Support / Resistance
-Long Score
-Short Score
+| Metric      | Description              |
+| ----------- | ------------------------ |
+| Symbol      | Futures symbol           |
+| Price       | Current price            |
+| Volume      | Market volume            |
+| RVOL        | Relative volume          |
+| 5m Trend    | Primary setup trend      |
+| 15m Trend   | Confirmation trend       |
+| 1h Trend    | Intraday context         |
+| OI Change   | Open Interest change     |
+| Funding     | Current funding rate     |
+| Volatility  | Current volatility state |
+| Long Score  | LONG confluence          |
+| Short Score | SHORT confluence         |
 
-Snapshots
-Üretilmiş AI Snapshot paketlerinin yönetildiği ekran.
-Snapshot:
-oluşturulabilir,
-listelenebilir,
-indirilebilir,
-yeniden üretilebilir.
-Journal
-Analizlerin sonuçlarının ölçülmesini sağlar.
-Örneğin:
+---
+
+## 🖥️ Frontend
+
+The dashboard is divided into several major screens.
+
+### Dashboard
+
+Provides a high-level overview of the system:
+
+* Backend status
+* WebSocket status
+* Data quality
+* Active symbol count
+* Top LONG candidates
+* Top SHORT candidates
+* Snapshot shortcuts
+
+### Scanner
+
+Displays and ranks USDT perpetual markets using lightweight analytics.
+
+### Symbol Detail
+
+Provides detailed analysis for an individual market:
+
+* Candlestick chart
+* Timeframe selector
+* Current price
+* Trend
+* RSI
+* ATR
+* VWAP
+* Volume
+* Market structure
+* Order flow
+* Order book
+* Open Interest
+* Funding
+* Support / Resistance
+* LONG score
+* SHORT score
+
+### Snapshots
+
+Allows generated AI analysis packages to be:
+
+* Created
+* Listed
+* Downloaded
+* Regenerated
+
+### Journal
+
+Stores analysis outcomes for later evaluation.
+
+Possible fields include:
+
+```text
 Snapshot ID
 Symbol
 AI Bias
@@ -399,6 +540,11 @@ data/
             ├── chart_5m.png
             ├── chart_15m.png
             └── chart_1h.png
+```
+
+### `analysis.json`
+
+The analysis package contains structured sections such as:
 
 ```text
 meta
@@ -466,95 +612,121 @@ futures-ai-market-intelligence/
 │   │   │   ├── scanner/
 │   │   │   ├── market/
 │   │   │   └── common/
+│   │   │
 │   │   ├── pages/
 │   │   │   ├── DashboardPage.tsx
 │   │   │   ├── ScannerPage.tsx
 │   │   │   ├── SymbolPage.tsx
 │   │   │   ├── SnapshotsPage.tsx
 │   │   │   └── JournalPage.tsx
+│   │   │
 │   │   ├── services/
 │   │   │   ├── api.ts
 │   │   │   └── socket.ts
+│   │   │
 │   │   ├── stores/
 │   │   │   └── marketStore.ts
+│   │   │
 │   │   ├── types/
 │   │   │   └── market.ts
+│   │   │
 │   │   └── main.tsx
 │   │
 │   ├── package.json
 │   └── vite.config.ts
 │
 ├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── config.py
-│   │   │
-│   │   ├── api/
-│   │   ├── binance/
-│   │   ├── market_data/
-│   │   ├── analytics/
-│   │   ├── scanner/
-│   │   ├── snapshots/
-│   │   ├── database/
-│   │   ├── cache/
-│   │   └── tests/
-│   │
-│   ├── requirements.txt
-│   └── Dockerfile
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   │
+│   │   ├── api/
+│   │   ├── binance/
+│   │   ├── market_data/
+│   │   ├── analytics/
+│   │   ├── scanner/
+│   │   ├── snapshots/
+│   │   ├── database/
+│   │   ├── cache/
+│   │   └── tests/
+│   │
+│   ├── requirements.txt
+│   └── Dockerfile
 │
 ├── data/
-│   ├── snapshots/
-│   └── exports/
+│   ├── snapshots/
+│   └── exports/
 │
 ├── docker-compose.yml
 ├── .env.example
 ├── .gitignore
 └── README.md
+```
 
-🔌 Backend API
-Planlanan temel API:
+---
+
+## 🔌 API Design
+
+Planned backend API:
+
+```http
 GET  /api/health
 
-GET  /api/symbols
+GET  /api/symbols
 
-GET  /api/market/{symbol}
-GET  /api/market/{symbol}/candles?interval=5m
-GET  /api/market/{symbol}/orderbook
-GET  /api/market/{symbol}/derivatives
+GET  /api/market/{symbol}
+GET  /api/market/{symbol}/candles?interval=5m
+GET  /api/market/{symbol}/orderbook
+GET  /api/market/{symbol}/derivatives
 
-GET  /api/analytics/{symbol}
+GET  /api/analytics/{symbol}
 
-GET  /api/scanner
-GET  /api/scanner/long
-GET  /api/scanner/short
+GET  /api/scanner
+GET  /api/scanner/long
+GET  /api/scanner/short
 
 POST /api/snapshots/{symbol}/generate
-GET  /api/snapshots
-GET  /api/snapshots/{id}/download
+GET  /api/snapshots
+GET  /api/snapshots/{id}/download
 
-GET  /api/journal
+GET  /api/journal
 POST /api/journal
 
 WS   /ws/market/{symbol}
+```
 
-🔐 Güvenlik
-V1 yalnızca market intelligence ve karar desteği sistemidir.
-İlk sürümde:
-❌ Otomatik emir açma
-❌ Withdrawal
-❌ Binance secret'ın frontend'e verilmesi
-❌ AI tarafından doğrudan trade execution
+---
 
-✅ Public market data
-✅ Read-only architecture
-✅ Deterministic analytics
-✅ Data quality validation
+## 🔐 Security Principles
 
-Public endpoint'ler yeterliyse Binance API key kullanılması gerekmez.
-İleride hesap veya pozisyon verileri eklenecekse ayrı bir read-only API key, IP whitelist ve backend .env secret yönetimi kullanılmalıdır.
-🚀 Geliştirme Yol Haritası
-Proje aşağıdaki sırayla geliştirilecektir:
-01 → Monorepo + React/Vite/TypeScript
+V1 is intentionally designed around public and read-only market data.
+
+### V1 does not include
+
+* ❌ Automatic trade execution
+* ❌ Withdrawal functionality
+* ❌ Binance secrets in the frontend
+* ❌ AI-controlled order execution
+
+### V1 focuses on
+
+* ✅ Public market data
+* ✅ Read-only architecture
+* ✅ Deterministic analytics
+* ✅ Data validation
+* ✅ Data-quality monitoring
+* ✅ Measurable analysis results
+
+If account or position information is introduced later, it should use a separate **read-only API key**, IP whitelisting, and backend-only environment variables.
+
+Secrets must never be exposed to the frontend.
+
+---
+
+## 🗺️ Development Roadmap
+
+```text
+01 → Monorepo + React / Vite / TypeScript
 02 → FastAPI Backend
 03 → Docker + PostgreSQL / TimescaleDB + Redis
 04 → Binance Data Layer
@@ -609,21 +781,60 @@ Current milestone:
 
 ```text
 React + Vite + TypeScript
-        ↓
-shadcn/ui Dashboard
-        ↓
-FastAPI Health API
-        ↓
-Binance Live Data
-        ↓
-Analytics
-        ↓
-Scanner
-        ↓
-AI Snapshot
-        ↓
-ChatGPT Analysis
-        ↓
-Journal
+          ↓
+    shadcn/ui Dashboard
+          ↓
+    FastAPI Health API
+          ↓
+    Binance Live Data
+          ↓
+       Analytics
+          ↓
+        Scanner
+          ↓
+      AI Snapshot
+          ↓
+   ChatGPT Analysis
+          ↓
+        Journal
+```
 
-İlk milestone, çalışan React/Vite/TypeScript frontend + Backend Status dashboard temelini oluşturmaktır.
+The first milestone is a working **React + Vite + TypeScript frontend with a Backend Status dashboard**.
+
+---
+
+## ⚠️ Disclaimer
+
+This project is intended for **research, market analysis, software development, and decision-support purposes**.
+
+It does not provide financial advice and does not guarantee profitable trading outcomes.
+
+Futures trading involves significant financial risk.
+
+Outputs such as:
+
+```text
+LONG
+SHORT
+NO TRADE
+Confluence Score
+Market Regime
+```
+
+must be interpreted as analytical information rather than guaranteed trading signals.
+
+**Confluence Score is not a win probability.**
+
+---
+
+## 📌 Project Philosophy
+
+```text
+Collect → Validate → Calculate → Compare → Analyze → Measure
+```
+
+The objective is not to force the system to produce a trade.
+
+**NO TRADE is a valid outcome.**
+
+The system becomes useful only when its analysis can be measured against what actually happens in the market.
