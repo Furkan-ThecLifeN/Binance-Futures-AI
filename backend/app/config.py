@@ -1,24 +1,57 @@
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+)
 
 
 class Settings(BaseSettings):
-    app_name: str = "Binance Futures AI Market Intelligence"
+    app_name: str = (
+        "Binance Futures AI "
+        "Market Intelligence"
+    )
+
     app_version: str = "0.1.0"
     environment: str = "development"
 
     api_prefix: str = "/api"
 
-    frontend_origin: str = "http://localhost:5173"
+    frontend_origin: str = (
+        "http://localhost:5173"
+    )
 
     database_url: str = (
         "postgresql+asyncpg://"
-        "futures_ai:change_me_local_password"
-        "@localhost:5432/futures_ai"
+        "futures_ai:"
+        "change_me_local_password"
+        "@localhost:5432/"
+        "futures_ai"
     )
 
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = (
+        "redis://localhost:6379/0"
+    )
+
+    binance_rest_base_url: str = (
+        "https://fapi.binance.com"
+    )
+
+    # Kline, aggTrade
+    binance_market_ws_base_url: str = (
+        "wss://fstream.binance.com/"
+        "market/stream"
+    )
+
+    # bookTicker, depth
+    binance_public_ws_base_url: str = (
+        "wss://fstream.binance.com/"
+        "public/stream"
+    )
+
+    binance_default_symbol: str = (
+        "BTCUSDT"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
