@@ -1,5 +1,13 @@
-export type BackendStatus = "waiting" | "online" | "offline"
+export type BackendStatus =
+  | "loading"
+  | "online"
+  | "offline"
 
-export type HealthResponse = {
+
+export interface HealthResponse {
   status: string
+  service: string
+  version: string
+  environment: string
+  timestamp: string
 }
