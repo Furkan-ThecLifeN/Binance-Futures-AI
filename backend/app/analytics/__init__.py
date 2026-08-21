@@ -1,3 +1,9 @@
+from app.analytics.confluence import (
+    ConfluenceResult,
+    FactorScore,
+    calculate_confluence,
+)
+
 from app.analytics.derivatives import (
     analyze_derivatives,
 )
@@ -37,6 +43,9 @@ from app.analytics.volume import (
 
 
 __all__ = [
+    "ConfluenceResult",
+    "FactorScore",
+    "calculate_confluence",
     "analyze_derivatives",
     "calculate_indicators",
     "latest_indicator_snapshot",
