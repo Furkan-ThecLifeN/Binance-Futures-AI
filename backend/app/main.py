@@ -3,32 +3,28 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import (
-    CORSMiddleware,
-)
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.analytics import (
+    router as analytics_router,
+)
 from app.api.health import (
     router as health_router,
+)
+from app.api.market import (
+    router as market_router,
+)
+from app.api.websocket import (
+    router as websocket_router,
 )
 
 from app.binance.schemas import (
     StreamMessage,
 )
-
 from app.binance.websocket_manager import (
     BinanceWebSocketManager,
 )
-
-from app.cache.redis_client import (
-    close_redis,
-)
-
 from app.config import settings
-
-from app.database.session import (
-    close_database,
-)
-
 from app.market_data.collector import (
     MarketDataCollector,
 )
@@ -44,8 +40,9 @@ logging.basicConfig(
     ),
 )
 
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(
+    __name__
+)
 
 
 collector = MarketDataCollector()
@@ -54,15 +51,19 @@ collector = MarketDataCollector()
 async def handle_binance_message(
     message: StreamMessage,
 ) -> None:
-
     await collector.handle_message(
         message
     )
 
 
 binance_ws = BinanceWebSocketManager(
-    symbol=settings.binance_default_symbol,
-    message_handler=handle_binance_message,
+    symbol=(
+        settings
+        .binance_default_symbol
+    ),
+    message_handler=(
+        handle_binance_message
+    ),
 )
 
 
@@ -79,8 +80,7 @@ async def lifespan(
     )
 
     logger.info(
-        "Binance data layer started "
-        "for %s",
+        "Binance data layer started for %s",
         settings.binance_default_symbol,
     )
 
@@ -94,12 +94,8 @@ async def lifespan(
 
         try:
             await websocket_task
-
         except asyncio.CancelledError:
             pass
-
-        await close_redis()
-        await close_database()
 
         logger.info(
             "Binance data layer stopped"
@@ -107,25 +103,18 @@ async def lifespan(
 
 
 app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
-    description=(
-        "Binance Futures AI "
-        "Market Intelligence Backend API"
-    ),
+    title="Binance Futures AI Market Intelligence",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
 
-allowed_origins = [
-    settings.frontend_origin,
-    "http://127.0.0.1:5173",
-]
-
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -134,5 +123,19 @@ app.add_middleware(
 
 app.include_router(
     health_router,
-    prefix=settings.api_prefix,
+    prefix="/api",
+)
+
+app.include_router(
+    market_router,
+    prefix="/api",
+)
+
+app.include_router(
+    analytics_router,
+    prefix="/api",
+)
+
+app.include_router(
+    websocket_router,
 )
